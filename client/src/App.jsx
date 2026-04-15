@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { apiGet, apiPost, apiPut } from "./api";
+import Navbar from "./components/Navbar";
+import AuthPage from "./pages/AuthPage";
+import HistoryPage from "./pages/HistoryPage";
+import AddWeightPage from "./pages/AddWeightPage";
+import AddWorkoutPage from "./pages/AddWorkoutPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -230,333 +236,75 @@ function App() {
     <div className="page">
       <header className="header">
         <h1>Gym Membership & Workout Logger</h1>
-        {user ? (
-          <div className="topActions">
-            <button
-              onClick={() => setPage("history")}
-              className={page === "history" ? "btn primary" : "btn"}
-              type="button"
-            >
-              History
-            </button>
-            <button
-              onClick={() => setPage("addWeight")}
-              className={page === "addWeight" ? "btn primary" : "btn"}
-              type="button"
-            >
-              Add Weight
-            </button>
-            <button
-              onClick={() => setPage("addWorkout")}
-              className={page === "addWorkout" ? "btn primary" : "btn"}
-              type="button"
-            >
-              Add Workout
-            </button>
-            <button
-              onClick={() => setPage("profile")}
-              className={page === "profile" ? "btn primary" : "btn"}
-              type="button"
-            >
-              Profile
-            </button>
-            <button onClick={handleLogout} className="btn" type="button">
-              Logout
-            </button>
-          </div>
-        ) : null}
+        {user ? <Navbar page={page} setPage={setPage} onLogout={handleLogout} /> : null}
       </header>
 
       {error ? <div className="alert error">{error}</div> : null}
       {message ? <div className="alert ok">{message}</div> : null}
 
       {!user ? (
-        <section className="card">
-          <div className="authHeader">
-            <h2>{authMode === "login" ? "Login" : "Signup"}</h2>
-            <div className="authTabs">
-              <button
-                className={authMode === "login" ? "btn primary" : "btn"}
-                onClick={() => setAuthMode("login")}
-                type="button"
-              >
-                Login
-              </button>
-              <button
-                className={authMode === "signup" ? "btn primary" : "btn"}
-                onClick={() => setAuthMode("signup")}
-                type="button"
-              >
-                Signup
-              </button>
-            </div>
-          </div>
-          <p className="hint">
-            This uses the <code>users</code> table (email + password).
-          </p>
-          <form
-            onSubmit={authMode === "login" ? handleLogin : handleSignup}
-            className="form"
-          >
-            {authMode === "signup" ? (
-              <>
-                <label>
-                  Name
-                  <input
-                    value={signupName}
-                    onChange={(e) => setSignupName(e.target.value)}
-                    required
-                  />
-                </label>
-                <label>
-                  Age
-                  <input
-                    value={signupAge}
-                    onChange={(e) => setSignupAge(e.target.value)}
-                    type="number"
-                    min="0"
-                  />
-                </label>
-                <label>
-                  Height (cm)
-                  <input
-                    value={signupHeight}
-                    onChange={(e) => setSignupHeight(e.target.value)}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                  />
-                </label>
-              </>
-            ) : null}
-            <label>
-              Email
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                required
-              />
-            </label>
-            <label>
-              Password
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                type="password"
-                required
-              />
-            </label>
-            <button className="btn primary" type="submit">
-              {authMode === "login" ? "Login" : "Create account"}
-            </button>
-          </form>
-        </section>
+        <AuthPage
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          signupName={signupName}
+          setSignupName={setSignupName}
+          signupAge={signupAge}
+          setSignupAge={setSignupAge}
+          signupHeight={signupHeight}
+          setSignupHeight={setSignupHeight}
+          onLogin={handleLogin}
+          onSignup={handleSignup}
+        />
       ) : (
         <section className="card">
-          {page === "history" ? (
-            <>
-              <h2>History</h2>
-              <p className="hint">Your saved weights and workouts (from MySQL).</p>
-
-              <div className="tableWrap">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Type</th>
-                      <th>Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {history.length === 0 ? (
-                      <tr>
-                        <td colSpan="3" className="mutedCell">
-                          No entries yet. Use “Add Weight” or “Add Workout”.
-                        </td>
-                      </tr>
-                    ) : (
-                      history.map((row) => (
-                        <tr key={`${row.type}-${row.id}`}>
-                          <td>{String(row.log_date).slice(0, 10)}</td>
-                          <td>{row.type}</td>
-                          <td>
-                            {row.type === "weight" ? (
-                              <span>
-                                Weight: <b>{row.weight}</b> kg
-                              </span>
-                            ) : (
-                              <span>
-                                <b>{row.exercise_name}</b>
-                                {row.sets != null ? ` • ${row.sets} sets` : ""}
-                                {row.reps != null ? ` • ${row.reps} reps` : ""}
-                                {row.duration != null ? ` • ${row.duration} min` : ""}
-                                {row.notes ? ` • ${row.notes}` : ""}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          ) : null}
+          {page === "history" ? <HistoryPage history={history} /> : null}
 
           {page === "addWeight" ? (
-            <>
-              <h2>Add Daily Weight</h2>
-              <form onSubmit={handleAddWeight} className="form">
-                <label>
-                  Date
-                  <input
-                    value={weightDate}
-                    onChange={(e) => setWeightDate(e.target.value)}
-                    type="date"
-                    required
-                  />
-                </label>
-                <label>
-                  Weight (kg)
-                  <input
-                    value={weight}
-                    onChange={(e) => setWeight(e.target.value)}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    required
-                  />
-                </label>
-                <button className="btn primary" type="submit">
-                  Save Weight
-                </button>
-              </form>
-            </>
+            <AddWeightPage
+              weightDate={weightDate}
+              setWeightDate={setWeightDate}
+              weight={weight}
+              setWeight={setWeight}
+              onSave={handleAddWeight}
+            />
           ) : null}
 
           {page === "addWorkout" ? (
-            <>
-              <h2>Add Workout</h2>
-              <form onSubmit={handleAddWorkout} className="form">
-                <label>
-                  Date
-                  <input
-                    value={workoutDate}
-                    onChange={(e) => setWorkoutDate(e.target.value)}
-                    type="date"
-                    required
-                  />
-                </label>
-                <label>
-                  Exercise
-                  <select
-                    className="select"
-                    value={exerciseId}
-                    onChange={(e) => setExerciseId(e.target.value)}
-                    required
-                  >
-                    <option value="">Select exercise</option>
-                    {exercises.map((ex) => (
-                      <option key={ex.exercise_id} value={ex.exercise_id}>
-                        {ex.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Sets (optional)
-                  <input
-                    value={sets}
-                    onChange={(e) => setSets(e.target.value)}
-                    type="number"
-                    min="0"
-                  />
-                </label>
-                <label>
-                  Reps (optional)
-                  <input
-                    value={reps}
-                    onChange={(e) => setReps(e.target.value)}
-                    type="number"
-                    min="0"
-                  />
-                </label>
-                <label>
-                  Duration (minutes, optional)
-                  <input
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    type="number"
-                    min="0"
-                  />
-                </label>
-                <label>
-                  Notes (optional)
-                  <input value={notes} onChange={(e) => setNotes(e.target.value)} />
-                </label>
-                <button className="btn primary" type="submit">
-                  Save Workout
-                </button>
-              </form>
-            </>
+            <AddWorkoutPage
+              workoutDate={workoutDate}
+              setWorkoutDate={setWorkoutDate}
+              exercises={exercises}
+              exerciseId={exerciseId}
+              setExerciseId={setExerciseId}
+              sets={sets}
+              setSets={setSets}
+              reps={reps}
+              setReps={setReps}
+              duration={duration}
+              setDuration={setDuration}
+              notes={notes}
+              setNotes={setNotes}
+              onSave={handleAddWorkout}
+            />
           ) : null}
 
           {page === "profile" ? (
-            <>
-              <h2>Edit Profile</h2>
-              <p className="hint">
-                Saving updates <b>MySQL</b> and also updates your <b>active session</b>.
-              </p>
-
-              <form onSubmit={handleSaveProfile} className="form">
-                <label>
-                  Name
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </label>
-                <label>
-                  Email
-                  <input
-                    value={profileEmail}
-                    onChange={(e) => setProfileEmail(e.target.value)}
-                    type="email"
-                    required
-                  />
-                </label>
-                <label>
-                  Age
-                  <input
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    type="number"
-                    min="0"
-                  />
-                </label>
-                <label>
-                  Height (cm)
-                  <input
-                    value={height}
-                    onChange={(e) => setHeight(e.target.value)}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                  />
-                </label>
-
-                <button className="btn primary" type="submit">
-                  Save
-                </button>
-              </form>
-
-              <div className="small">
-                <b>Session user now:</b>
-                <pre>{JSON.stringify(user, null, 2)}</pre>
-              </div>
-            </>
+            <ProfilePage
+              name={name}
+              setName={setName}
+              profileEmail={profileEmail}
+              setProfileEmail={setProfileEmail}
+              age={age}
+              setAge={setAge}
+              height={height}
+              setHeight={setHeight}
+              onSave={handleSaveProfile}
+              user={user}
+            />
           ) : null}
         </section>
       )}

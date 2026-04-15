@@ -6,6 +6,27 @@
 - **Express API (session login + Edit Profile)**: `index.js`
 - **React app (Login + Edit Profile UI)**: `client/`
 
+## Folder structure (simple)
+
+Backend:
+
+- `index.js` (server entry)
+- `config/db.js` (MySQL pool)
+- `server/middleware/requireAuth.js`
+- `server/routes/auth.js` (login/signup/logout/me)
+- `index.js` also contains: profile routes
+- `index.js` also contains: weight/workout + history routes
+
+Frontend:
+
+- `client/src/api.js` (fetch helpers)
+- `client/src/components/Navbar.jsx`
+- `client/src/pages/AuthPage.jsx`
+- `client/src/pages/HistoryPage.jsx`
+- `client/src/pages/AddWeightPage.jsx`
+- `client/src/pages/AddWorkoutPage.jsx`
+- `client/src/pages/ProfilePage.jsx`
+
 ## 1) Setup MySQL
 
 1. Start your MySQL server (ex: **XAMPP MySQL** or **MySQL80** service).
@@ -42,7 +63,7 @@ From the project root:
 npm run dev
 ```
 
-API runs at `http://localhost:3001`.
+API runs at `http://localhost:9000`.
 
 ## 3) Run the frontend (React)
 
@@ -53,11 +74,11 @@ cd client
 npm run dev
 ```
 
-Open `http://localhost:5173`.
+Open the frontend URL Vite prints (usually `http://localhost:5173`, but it can change if the port is busy).
 
 ## How Edit Profile works (simple)
 
-- React calls **PUT** `/api/profile`
+- React calls **PUT** `/profile`
 - Express updates the **users** table
 - Express also updates `req.session.user`
 - React sets its local `user` state from the response

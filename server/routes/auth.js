@@ -1,32 +1,30 @@
-const express = require("express");
-const db = require("../../config/db");
+const express = require('express');
+const db = require('../../config/db');
 
 const router = express.Router();
 
-// Beginner-friendly signup:
-// - creates a new user (plain text password, for school/demo only)
-// - logs in by saving user in session
-router.post("/signup", (req, res) => {
+
+router.post('/signup', (req, res) => {
   const { name, email, password, age, height } = req.body;
 
   if (!name || !email || !password) {
     return res
       .status(400)
-      .json({ error: "Name, email, and password are required" });
+      .json({ error: 'Name, email, and password are required' });
   }
 
   const sql =
-    "INSERT INTO users (name, email, password, age, height) VALUES (?, ?, ?, ?, ?)";
+    'INSERT INTO users (name, email, password, age, height) VALUES (?, ?, ?, ?, ?)';
 
   db.query(
     sql,
     [name, email, password, age || null, height || null],
     (err, result) => {
       if (err) {
-        if (err.code === "ER_DUP_ENTRY") {
-          return res.status(409).json({ error: "Email already exists" });
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({ error: 'Email already exists' });
         }
-        return res.status(500).json({ error: "Database error" });
+        return res.status(500).json({ error: 'Database error' });
       }
 
       req.session.user = {
@@ -42,23 +40,21 @@ router.post("/signup", (req, res) => {
   );
 });
 
-// Beginner-friendly login:
-// - checks email + password (plain text, for school/demo only)
-// - stores user in session (without password)
-router.post("/login", (req, res) => {
+
+router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
+    return res.status(400).json({ error: 'Email and password are required' });
   }
 
   const sql =
-    "SELECT user_id, name, email, age, height FROM users WHERE email = ? AND password = ? LIMIT 1";
+    'SELECT user_id, name, email, age, height FROM users WHERE email = ? AND password = ? LIMIT 1';
 
   db.query(sql, [email, password], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Database error" });
+    if (err) return res.status(500).json({ error: 'Database error' });
     if (!rows || rows.length === 0) {
-      return res.status(401).json({ error: "Wrong email or password" });
+      return res.status(401).json({ error: 'Wrong email or password' });
     }
 
     req.session.user = rows[0];
@@ -66,13 +62,13 @@ router.post("/login", (req, res) => {
   });
 });
 
-router.post("/logout", (req, res) => {
+router.post('/logout', (req, res) => {
   req.session.destroy(() => {
     res.json({ ok: true });
   });
 });
 
-router.get("/me", (req, res) => {
+router.get('/me', (req, res) => {
   res.json({ user: req.session.user || null });
 });
 
